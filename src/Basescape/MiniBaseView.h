@@ -26,6 +26,8 @@ namespace OpenXcom
 class Base;
 class SurfaceSet;
 
+typedef void (State::* NewBaseSelectedHandler)(Base*);
+
 /**
  * Mini view of a base.
  * Takes all the bases and displays their layout
@@ -38,26 +40,27 @@ private:
 
 	std::vector<Base*> *_bases;
 	SurfaceSet *_texture;
-	size_t _base, _hoverBase;
+	size_t _base, _hoverBase, _startIndex;
 	Uint8 _red, _green, _blue;
+	NewBaseSelectedHandler _newBaseSelectedHandler;
 public:
 	static const size_t MAX_BASES = 8;
 	/// Creates a new mini base view at the specified position and size.
-	MiniBaseView(int width, int height, int x = 0, int y = 0);
+	MiniBaseView(std::vector<Base*> *bases, NewBaseSelectedHandler newBaseSelectedHandler, int width, int height, int x = 0, int y = 0);
 	/// Cleans up the mini base view.
 	~MiniBaseView();
-	/// Sets the base list to display.
-	void setBases(std::vector<Base*> *bases);
 	/// Sets the texture for the mini base view.
 	void setTexture(SurfaceSet *texture);
 	/// Gets the base the mouse is over.
 	size_t getHoveredBase() const;
 	/// Sets the selected base for the mini base view.
-	void setSelectedBase(size_t base);
+	void setSelectedBase(Base *base);
 	/// Draws the mini base view.
 	void draw() override;
 	/// Special handling for mouse hovers.
 	void mouseOver(Action *action, State *state) override;
+	/// Handles a mouse click event.
+	void mouseClick(Action *action, State *state) override;
 	void setColor(Uint8 color) override;
 	void setSecondaryColor(Uint8 color) override;
 	void setBorderColor(Uint8 color) override;

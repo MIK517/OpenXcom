@@ -1354,11 +1354,27 @@ Base *SavedGame::getSelectedBase()
 
 /**
  * Sets the last selected player base.
- * @param base number of the base.
+ * @param base The index of the base.
  */
 void SavedGame::setSelectedBase(size_t base)
 {
 	_selectedBase = base;
+}
+
+/**
+ * Sets the last selected player base.
+ * @param base The base.
+ */
+void SavedGame::setSelectedBase(Base *base)
+{
+	for (int i = 0; i < _bases.size(); ++i)
+	{
+		if (_bases.at(i) == base)
+		{
+			_selectedBase = i;
+			return;
+		}
+	}
 }
 
 /**

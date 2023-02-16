@@ -29,12 +29,13 @@ namespace OpenXcom
 
 /**
  * Sets up a mini base view with the specified size and position.
+ * @param bases Pointer to base list to display.
  * @param width Width in pixels.
  * @param height Height in pixels.
  * @param x X position in pixels.
  * @param y Y position in pixels.
  */
-MiniBaseView::MiniBaseView(int width, int height, int x, int y) : InteractiveSurface(width, height, x, y), _bases(0), _texture(0), _base(0), _hoverBase(0), _red(0), _green(0), _blue(0)
+MiniBaseView::MiniBaseView(std::vector<Base *> *bases, NewBaseSelectedHandler newBaseSelectedHandler, int width, int height, int x, int y) : InteractiveSurface(width, height, x, y), _bases(bases), _startIndex(0), _newBaseSelectedHandler(newBaseSelectedHandler), _texture(0), _base(0), _hoverBase(0), _red(0), _green(0), _blue(0)
 {
 }
 
@@ -43,16 +44,6 @@ MiniBaseView::MiniBaseView(int width, int height, int x, int y) : InteractiveSur
  */
 MiniBaseView::~MiniBaseView()
 {
-}
-
-/**
- * Changes the current list of bases to display.
- * @param bases Pointer to base list to display.
- */
-void MiniBaseView::setBases(std::vector<Base*> *bases)
-{
-	_bases = bases;
-	_redraw = true;
 }
 
 /**
@@ -77,11 +68,27 @@ size_t MiniBaseView::getHoveredBase() const
 /**
  * Changes the base that is currently selected on
  * the mini base view.
- * @param base ID of base.
+ * @param base the desired base.
  */
-void MiniBaseView::setSelectedBase(size_t base)
+void MiniBaseView::setSelectedBase(Base *base)
 {
-	_base = base;
+	for (size_t i = 0; i < _bases->size(); ++i)
+	{
+		if (_bases->at(i) == base)
+		{
+			if (i >= MAX_BASES-1)
+			{
+				if (i < _bases->size()-1) _base = MAX_BASES-2; else _base = MAX_BASES-1;
+				_startIndex = i - _base;
+			}
+			else
+			{
+				_base = i;
+				_startIndex = 0;
+			}
+			break;
+		}
+	}
 	_redraw = true;
 }
 
@@ -107,11 +114,11 @@ void MiniBaseView::draw()
 		_texture->getFrame(41)->blitNShade(this, i * (MINI_SIZE + 2), 0);
 
 		// Draw facilities
-		if (i < _bases->size())
+		if (_startIndex+i < _bases->size())
 		{
 			SDL_Rect r;
 			lock();
-			for (const auto* fac : *_bases->at(i)->getFacilities())
+			for (const auto* fac : *_bases->at(_startIndex+i)->getFacilities())
 			{
 				int color;
 				if (fac->getDisabled())
@@ -155,8 +162,36 @@ void MiniBaseView::draw()
  */
 void MiniBaseView::mouseOver(Action *action, State *state)
 {
-	_hoverBase = (int)floor(action->getRelativeXMouse() / ((MINI_SIZE + 2) * action->getXScale()));
+	_hoverBase = _startIndex+(int)floor(action->getRelativeXMouse() / ((MINI_SIZE + 2) * action->getXScale()));
 	InteractiveSurface::mouseOver(action, state);
+}
+
+/**
+ * Handles a mouse click event.
+ * @param action Pointer to an action.
+ * @param state State that the action handlers belong to.
+ */
+void MiniBaseView::mouseClick(Action *action, State *state)
+{
+	if (SDL_BUTTON_LEFT == action->getDetails()->button.button)
+	{
+		size_t base = (int)floor(action->getRelativeXMouse() / ((MINI_SIZE + 2) * action->getXScale()));
+		if (_startIndex+base < _bases->size())
+		{
+			if (MAX_BASES-1 == base && _startIndex+base+1 < _bases->size())
+			{
+				++_startIndex; --base;
+			}
+			else if (0 == base && _startIndex > 0)
+			{
+				--_startIndex; ++base;
+			}
+			_base = base;
+			_redraw = true;
+			(state->*_newBaseSelectedHandler)(_bases->at(_startIndex+base));
+		}
+	}
+	InteractiveSurface::mouseClick(action, state);
 }
 
 void MiniBaseView::setColor(Uint8 color)

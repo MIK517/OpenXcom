@@ -1029,6 +1029,8 @@ en-US:
   STR_GROUND: "GROUND"
   STR_LIVING_QUARTERS_PLURAL: "Living Quarters"
   STR_LIST_ITEM: "ITEM"
+  STR_UNLIMITEDBASES: "Unlimited bases"
+  STR_UNLIMITEDBASES_DESC: "You can build any number of bases, even more than 8. Of course the aliens are also able to build more than 8, if this is turned on. The first and the last item of the mini base view are auto-scrolling the view."
   STR_PERSONAL_ARMOR_UFOPEDIA: "Using the newly discovered Alien Alloys, this new armor gives our men a fighting chance against the alien threat."
   STR_POWER_SUIT_UFOPEDIA: "A powerful new protection for soldiers, this armor is powered by an Elerium energy source and greatly amplifies the speed and strength of the wearer, it offers the best protection yet for combat troops."
   STR_FLYING_SUIT_UFOPEDIA: "An enhanced version of the Power Suit, incorporating alien anti-gravity navigation technology to allow full freedom of movement across the battlefield."
